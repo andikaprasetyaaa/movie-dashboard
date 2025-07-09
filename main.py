@@ -18,7 +18,8 @@ def load_and_prepare_data(url):
     df['Vote_Average'] = pd.to_numeric(df['Vote_Average'], errors='coerce')
     df['Popularity'] = pd.to_numeric(df['Popularity'], errors='coerce')
     df = df.dropna(subset=['Release_Date', 'Vote_Average', 'Popularity', 'Vote_Count', 'Original_Language', 'Overview'])
-    df['Genre'] = df['Genre'].fillna('').apply(lambda x: [g.strip() for g in x.split(',') if g.strip()])
+    # BARIS INI YANG DIUBAH: Mengubah list menjadi tuple
+    df['Genre'] = df['Genre'].fillna('').apply(lambda x: tuple(g.strip() for g in x.split(',') if g.strip()))
     LANGUAGE_MAP = {
         "en": "Inggris", "fr": "Prancis", "ja": "Jepang", "ko": "Korea", "es": "Spanyol", "de": "Jerman",
         "hi": "Hindi", "zh": "Mandarin", "it": "Italia", "pt": "Portugis", "ru": "Rusia", "id": "Indonesia",
@@ -41,6 +42,8 @@ def load_and_prepare_data(url):
 @st.cache_data
 def compute_similarity(df):
     """Menghitung matriks kemiripan kosinus berbasis TF-IDF."""
+    # Untuk TF-IDFVectorizer, Anda perlu mengubah tuple kembali ke string jika diperlukan
+    # Namun, `join` pada tuple secara langsung sudah berfungsi.
     df['combined_features'] = df['Genre'].apply(lambda x: ' '.join(x)) + " " + df['Overview']
     tfidf = TfidfVectorizer(stop_words='english')
     tfidf_matrix = tfidf.fit_transform(df['combined_features'])
